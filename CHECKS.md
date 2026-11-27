@@ -45,4 +45,5 @@ from `lean/parts/`.
 
 ## 2026-11-27: registry pull request #4101
 The `check-proof` CI job on https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4101 completed
-with SUCCESS (07:51 UTC). The pull request is open; no review and no verdict comment yet.
+with SUCCESS (07:51 UTC). The registry bot then posted ACCEPTED (kernel accepted; axioms within propext,
+Classical.choice, Quot.sound) and the pull request was merged at 08:09 UTC.

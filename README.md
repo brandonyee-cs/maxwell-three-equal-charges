@@ -64,8 +64,8 @@ The work here:
   [open-math-agents](https://github.com/GuillaumeBAUD-coder/open-math-agents) registry as
   [pull request #4101](https://github.com/GuillaumeBAUD-coder/open-math-agents/pull/4101), as a
   reduction of a known target. The local registry check accepted it, and the registry's automated
-  `check-proof` CI job on the pull request passed (2026-11-27). The pull request is still open, with
-  no review or bot verdict comment yet. The main target `three_charges` is untouched apart from the numerical search.
+  `check-proof` CI job on the pull request passed, and the registry bot accepted and merged it
+  (2026-11-27: "kernel accepted; axioms within propext, Classical.choice, Quot.sound"). The main target `three_charges` is untouched apart from the numerical search.
 - **Paper proofs.** The statements of H1 and H2, why they follow from Tsai's theorem, and the proofs
   of what the Lean files prove are in [PROOF.md](PROOF.md). They have **not been checked by a human
   expert**. Tsai's full text was not available to us, so the link to his theorem rests on the
