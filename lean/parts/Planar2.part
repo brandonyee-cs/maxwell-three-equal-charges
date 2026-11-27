@@ -1,0 +1,136 @@
+
+namespace OMA.Maxwell3
+open Arxiv.«2607.27197»
+
+section Frame
+variable (f1 f2 : E)
+
+lemma frame_norm (hf : ⟪f1, f2⟫ = 0) (hn : ‖f2‖ = ‖f1‖) (α β : ℝ) :
+    ‖α • f1 + β • f2‖ = ‖f1‖ * Real.sqrt (α^2 + β^2) := by
+  have h2 : ‖α • f1 + β • f2‖^2 = ‖f1‖^2 * (α^2 + β^2) := by
+    rw [norm_add_sq_real, norm_smul, norm_smul, real_inner_smul_left, real_inner_smul_right, hf, hn]
+    simp only [Real.norm_eq_abs, mul_pow, sq_abs]
+    ring
+  rw [← Real.sqrt_sq (norm_nonneg _), h2, Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq (norm_nonneg _)]
+
+lemma frame_inner (hf : ⟪f1, f2⟫ = 0) (hn : ‖f2‖ = ‖f1‖) (α β γ δ : ℝ) :
+    ⟪α • f1 + β • f2, γ • f1 + δ • f2⟫ = ‖f1‖^2 * (α * γ + β * δ) := by
+  have hf' : ⟪f2, f1⟫ = 0 := by rw [real_inner_comm]; exact hf
+  simp only [inner_add_left, inner_add_right, real_inner_smul_left, real_inner_smul_right, hf, hf',
+    real_inner_self_eq_norm_sq, hn]
+  ring
+
+lemma frame_eq_zero (hf : ⟪f1, f2⟫ = 0) (hn : ‖f2‖ = ‖f1‖) (h1 : f1 ≠ 0) (α β : ℝ)
+    (h : α • f1 + β • f2 = 0) : α = 0 ∧ β = 0 := by
+  have hL : ‖f1‖^2 ≠ 0 := pow_ne_zero 2 (norm_ne_zero_iff.mpr h1)
+  have e1 := frame_inner f1 f2 hf hn α β 1 0
+  have e2 := frame_inner f1 f2 hf hn α β 0 1
+  rw [h, inner_zero_left] at e1 e2
+  constructor
+  · have : ‖f1‖^2 * α = 0 := by linarith
+    exact (mul_eq_zero.mp this).resolve_left hL
+  · have : ‖f1‖^2 * β = 0 := by linarith
+    exact (mul_eq_zero.mp this).resolve_left hL
+
+end Frame
+
+/-- An orthogonal frame adapted to a non-degenerate triangle: `a 1 = a 0 + f1`,
+`a 2 = a 0 + u f1 + w f2`, with `f1 ⊥ f2`, `‖f1‖ = ‖f2‖`, `w ≠ 0`. -/
+lemma exists_frame (a : Fin 3 → E) (hind : AffineIndependent ℝ a) :
+    ∃ (f1 f2 : E) (u w : ℝ), f1 ≠ 0 ∧ ⟪f1, f2⟫ = 0 ∧ ‖f2‖ = ‖f1‖ ∧ w ≠ 0 ∧
+      a 1 = a 0 + f1 ∧ a 2 = a 0 + u • f1 + w • f2 := by
+  set f1 := a 1 - a 0
+  have hf1 : f1 ≠ 0 := sub_ne_zero.mpr (fun h => absurd (hind.injective h) (by decide))
+  have hL : ‖f1‖ ≠ 0 := norm_ne_zero_iff.mpr hf1
+  have hff : ⟪f1, f1⟫ ≠ 0 := by rw [real_inner_self_eq_norm_sq]; exact pow_ne_zero 2 hL
+  set t := ⟪a 2 - a 0, f1⟫ / ⟪f1, f1⟫
+  set g := (a 2 - a 0) - t • f1
+  have hg : g ≠ 0 := by
+    intro hg0
+    have hsum : ∑ i, (![t - 1, -t, 1] : Fin 3 → ℝ) i = 0 := by
+      simp [Fin.sum_univ_three]; ring
+    have hv : (Finset.univ : Finset (Fin 3)).weightedVSub a (![t - 1, -t, 1] : Fin 3 → ℝ) = (0 : E) := by
+      rw [Finset.weightedVSub_eq_linear_combination _ hsum, ← hg0]
+      simp only [Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons, g, f1]
+      module
+    have := hind Finset.univ _ hsum hv 2 (Finset.mem_univ _)
+    simp at this
+  have hgn : ‖g‖ ≠ 0 := norm_ne_zero_iff.mpr hg
+  refine ⟨f1, (‖f1‖ / ‖g‖) • g, t, ‖g‖ / ‖f1‖, hf1, ?_, ?_, div_ne_zero hgn hL, by simp [f1], ?_⟩
+  · rw [real_inner_smul_right]
+    have : ⟪f1, g⟫ = 0 := by
+      rw [show g = (a 2 - a 0) - t • f1 from rfl, inner_sub_right, real_inner_smul_right,
+        real_inner_comm (a 2 - a 0) f1]
+      simp only [t]
+      rw [div_mul_cancel₀ _ hff, sub_self]
+    rw [this, mul_zero]
+  · rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (div_nonneg (norm_nonneg _) (norm_nonneg _))]
+    field_simp
+  · rw [smul_smul, div_mul_div_comm, mul_comm ‖g‖ ‖f1‖, div_self (mul_ne_zero hL hgn), one_smul]
+    simp only [g]
+    abel
+
+section Coords
+variable (q : Fin 3 → ℝ) (a : Fin 3 → E) (a0 f1 f2 : E) (X Y : Fin 3 → ℝ)
+
+lemma coords_sub (ha : ∀ j, a j = a0 + X j • f1 + Y j • f2) (s t : ℝ) (j : Fin 3) :
+    (a0 + s • f1 + t • f2) - a j = (s - X j) • f1 + (t - Y j) • f2 := by
+  rw [ha j]; module
+
+lemma coords_field (hf : ⟪f1, f2⟫ = 0) (hn : ‖f2‖ = ‖f1‖)
+    (ha : ∀ j, a j = a0 + X j • f1 + Y j • f2) (s t : ℝ) :
+    field q a (a0 + s • f1 + t • f2) = (‖f1‖^3)⁻¹ •
+      ((∑ j, q j * (s - X j) / Real.sqrt ((s - X j)^2 + (t - Y j)^2)^3) • f1 +
+       (∑ j, q j * (t - Y j) / Real.sqrt ((s - X j)^2 + (t - Y j)^2)^3) • f2) := by
+  unfold field
+  simp only [coords_sub a a0 f1 f2 X Y ha, frame_norm f1 f2 hf hn, Fin.sum_univ_three]
+  module
+
+/-- the 2-D Hessian entries -/
+lemma coords_kernel (hf : ⟪f1, f2⟫ = 0) (hn : ‖f2‖ = ‖f1‖) (h1 : f1 ≠ 0)
+    (ha : ∀ j, a j = a0 + X j • f1 + Y j • f2) (s t : ℝ)
+    (hR : ∀ j, (s - X j)^2 + (t - Y j)^2 ≠ 0) (v1 v2 : ℝ) :
+    ∑ j, ((q j / ‖(a0 + s • f1 + t • f2) - a j‖^3) • (v1 • f1 + v2 • f2) +
+        ((-(3 * q j) / ‖(a0 + s • f1 + t • f2) - a j‖^5) *
+          ⟪(a0 + s • f1 + t • f2) - a j, v1 • f1 + v2 • f2⟫) • ((a0 + s • f1 + t • f2) - a j)) =
+    (‖f1‖^3)⁻¹ •
+      ((-((∑ j, q j * (2 * (s - X j)^2 - (t - Y j)^2) / Real.sqrt ((s - X j)^2 + (t - Y j)^2)^5) * v1 +
+          (∑ j, q j * (3 * (s - X j) * (t - Y j)) / Real.sqrt ((s - X j)^2 + (t - Y j)^2)^5) * v2)) • f1 +
+       (-((∑ j, q j * (3 * (s - X j) * (t - Y j)) / Real.sqrt ((s - X j)^2 + (t - Y j)^2)^5) * v1 +
+          (∑ j, q j * (2 * (t - Y j)^2 - (s - X j)^2) / Real.sqrt ((s - X j)^2 + (t - Y j)^2)^5) * v2)) • f2) := by
+  have hL : ‖f1‖ ≠ 0 := norm_ne_zero_iff.mpr h1
+  -- per-term identity
+  have term : ∀ (c δ1 δ2 : ℝ), δ1^2 + δ2^2 ≠ 0 →
+      (c / (‖f1‖ * Real.sqrt (δ1^2 + δ2^2))^3) • (v1 • f1 + v2 • f2) +
+        ((-(3 * c) / (‖f1‖ * Real.sqrt (δ1^2 + δ2^2))^5) * (‖f1‖^2 * (δ1 * v1 + δ2 * v2))) •
+          (δ1 • f1 + δ2 • f2) =
+      (‖f1‖^3)⁻¹ • ((-(c * (2 * δ1^2 - δ2^2) / Real.sqrt (δ1^2 + δ2^2)^5 * v1 +
+          c * (3 * δ1 * δ2) / Real.sqrt (δ1^2 + δ2^2)^5 * v2)) • f1 +
+        (-(c * (3 * δ1 * δ2) / Real.sqrt (δ1^2 + δ2^2)^5 * v1 +
+          c * (2 * δ2^2 - δ1^2) / Real.sqrt (δ1^2 + δ2^2)^5 * v2)) • f2) := by
+    intro c δ1 δ2 hd
+    set R := Real.sqrt (δ1^2 + δ2^2) with hRdef
+    have hR2 : R^2 = δ1^2 + δ2^2 := Real.sq_sqrt (by positivity)
+    have hR0 : R ≠ 0 := by
+      intro h0; apply hd; rw [← hR2, h0]; ring
+    have e1 : c / (‖f1‖ * R)^3 * v1 + (-(3 * c) / (‖f1‖ * R)^5) * (‖f1‖^2 * (δ1 * v1 + δ2 * v2)) * δ1
+        = (‖f1‖^3)⁻¹ * (-(c * (2 * δ1^2 - δ2^2) / R^5 * v1 + c * (3 * δ1 * δ2) / R^5 * v2)) := by
+      field_simp
+      linear_combination (c * v1) * hR2
+    have e2 : c / (‖f1‖ * R)^3 * v2 + (-(3 * c) / (‖f1‖ * R)^5) * (‖f1‖^2 * (δ1 * v1 + δ2 * v2)) * δ2
+        = (‖f1‖^3)⁻¹ * (-(c * (3 * δ1 * δ2) / R^5 * v1 + c * (2 * δ2^2 - δ1^2) / R^5 * v2)) := by
+      field_simp
+      linear_combination (c * v2) * hR2
+    calc _ = (c / (‖f1‖ * R)^3 * v1 + (-(3 * c) / (‖f1‖ * R)^5) * (‖f1‖^2 * (δ1 * v1 + δ2 * v2)) * δ1) • f1
+          + (c / (‖f1‖ * R)^3 * v2 + (-(3 * c) / (‖f1‖ * R)^5) * (‖f1‖^2 * (δ1 * v1 + δ2 * v2)) * δ2) • f2 := by
+            module
+      _ = _ := by rw [e1, e2]; module
+  simp only [coords_sub a a0 f1 f2 X Y ha, frame_norm f1 f2 hf hn, frame_inner f1 f2 hf hn]
+  rw [Fin.sum_univ_three, term _ _ _ (hR 0), term _ _ _ (hR 1), term _ _ _ (hR 2)]
+  simp only [Fin.sum_univ_three]
+  module
+
+end Coords
+
+end OMA.Maxwell3

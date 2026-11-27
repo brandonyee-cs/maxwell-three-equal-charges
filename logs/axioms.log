@@ -1,0 +1,16 @@
+'OMA.R_Arxiv_2607_27197_maxwell_conjecture_variants_three_equal_magnitudes_R1.main' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'OMA.R_Arxiv_2607_27197_maxwell_conjecture_variants_three_equal_magnitudes_R1.collinear_case' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'OMA.R_Arxiv_2607_27197_maxwell_conjecture_variants_three_equal_magnitudes_R1.equilibria_subset_affineSpan' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'OMA.R_Arxiv_2607_27197_maxwell_conjecture_variants_three_equal_magnitudes_R1.planar_transfer' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'OMA.R_Arxiv_2607_27197_maxwell_conjecture_variants_three_equal_magnitudes_R1.oneD_count' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'OMA.Maxwell3.three_equal_magnitudes_of_planar' depends on axioms: [propext, Classical.choice, Quot.sound]

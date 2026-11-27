@@ -1,0 +1,155 @@
+
+namespace OMA.Maxwell3
+open Arxiv.«2607.27197»
+
+lemma exists_orth (d v : E) : ∃ u : E, u ≠ 0 ∧ ⟪d, u⟫ = 0 ∧ ⟪v, u⟫ = 0 := by
+  set K : Submodule ℝ E := Submodule.span ℝ (Set.range ![d, v])
+  have hK : Module.finrank ℝ K ≤ 2 := by
+    have := finrank_range_le_card (R := ℝ) ![d, v]
+    simpa [Set.finrank] using this
+  have hsum := Submodule.finrank_add_finrank_orthogonal K
+  rw [finrank_euclideanSpace_fin] at hsum
+  have hne : Kᗮ ≠ ⊥ := by
+    intro h
+    rw [h, finrank_bot] at hsum
+    omega
+  obtain ⟨u, hu, hu0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hne
+  refine ⟨u, hu0, ?_, ?_⟩
+  · exact Submodule.inner_right_of_mem_orthogonal (Submodule.subset_span (show d ∈ Set.range ![d, v] from ⟨0, rfl⟩)) hu
+  · exact Submodule.inner_right_of_mem_orthogonal (Submodule.subset_span (show v ∈ Set.range ![d, v] from ⟨1, rfl⟩)) hu
+
+/-- Collinear charges of equal magnitude, all equilibria non-degenerate: at most four equilibria. -/
+lemma collinear_case (q : Fin 3 → ℝ) (a : Fin 3 → E) (ha : Function.Injective a)
+    (hq : ∀ j, q j ≠ 0) (hq' : ∀ i j, |q i| = |q j|)
+    (hnd : ∀ x ∈ equilibria q a, HasNondegenerateHessianAt (potential q a) x)
+    (hcol : Collinear ℝ (Set.range a)) : (equilibria q a).encard ≤ 4 := by
+  obtain ⟨p₀, v, hv⟩ := (collinear_iff_exists_forall_eq_smul_vadd _).mp hcol
+  choose r hr using fun j => hv (a j) ⟨j, rfl⟩
+  simp only [vadd_eq_add] at hr
+  have hv0 : v ≠ 0 := by
+    intro h0
+    have : a 0 = a 1 := by rw [hr 0, hr 1, h0]; simp
+    exact absurd (ha this) (by decide)
+  have hvv : ⟪v, v⟫ ≠ 0 := by
+    rw [real_inner_self_eq_norm_sq]; exact pow_ne_zero 2 (norm_ne_zero_iff.mpr hv0)
+  -- every equilibrium lies on the line
+  have hline : ∀ x ∈ equilibria q a, x = (⟪x - p₀, v⟫ / ⟪v, v⟫) • v + p₀ := by
+    intro x hx
+    by_contra hoff
+    have hx' := (mem_equilibria_iff q a x).mp hx
+    obtain ⟨d, hd⟩ : ∃ d, d = x - p₀ := ⟨_, rfl⟩
+    set c : Fin 3 → ℝ := fun j => q j / ‖x - a j‖^3
+    have hxa (j : Fin 3) : x - a j = d - r j • v := by rw [hd, hr j]; abel
+    have hF : (∑ j, c j) • d - (∑ j, c j * r j) • v = 0 := by
+      have := hx'.2
+      unfold field at this
+      simp only [hxa] at this
+      rw [← this, Finset.sum_smul, Finset.sum_smul, ← Finset.sum_sub_distrib]
+      apply Finset.sum_congr rfl
+      intro j _
+      simp only [c, smul_sub, smul_smul]
+      rw [hxa j]
+    have hS : ∑ j, c j = 0 := by
+      by_contra hS
+      apply hoff
+      have : d = ((∑ j, c j * r j) / ∑ j, c j) • v := by
+        rw [sub_eq_zero] at hF
+        rw [div_eq_inv_mul, mul_smul, ← hF, smul_smul, inv_mul_cancel₀ hS, one_smul]
+      have h2 : ⟪d, v⟫ / ⟪v, v⟫ = (∑ j, c j * r j) / ∑ j, c j := by
+        rw [this, real_inner_smul_left, mul_div_assoc, div_self hvv, mul_one]
+      rw [← hd, h2, ← this, hd, sub_add_cancel]
+    obtain ⟨u, hu0, hdu, hvu⟩ := exists_orth d v
+    apply not_nondegenerate q a x hx'.1 u hu0 _ hS (hnd x hx)
+    intro j
+    rw [hxa, inner_sub_left, real_inner_smul_left, hdu, hvu]; ring
+  -- map to the line parameter
+  let g : E → ℝ := fun x => ⟪x - p₀, v⟫ / ⟪v, v⟫
+  have hmaps : Set.MapsTo g (equilibria q a)
+      {s : ℝ | (∀ j, s ≠ r j) ∧ ∑ j, q j / |s - r j|^3 * (s - r j) = 0} := by
+    intro x hx
+    have hx' := (mem_equilibria_iff q a x).mp hx
+    have hxl := hline x hx
+    set s := g x
+    have hxa (j : Fin 3) : x - a j = (s - r j) • v := by
+      rw [hr j]; conv_lhs => rw [hxl]
+      rw [sub_smul]; abel
+    refine ⟨fun j hj => hx'.1 ⟨j, ?_⟩, ?_⟩
+    · have := hxa j; rw [hj, sub_self, zero_smul] at this; exact (sub_eq_zero.mp this).symm
+    · have h0 := hx'.2
+      unfold field at h0
+      simp only [hxa, norm_smul, Real.norm_eq_abs, smul_smul, ← Finset.sum_smul] at h0
+      have h1 := (smul_eq_zero.mp h0).resolve_right hv0
+      have hn : ‖v‖ ≠ 0 := norm_ne_zero_iff.mpr hv0
+      have : ∑ j, q j / |s - r j|^3 * (s - r j) = ‖v‖^3 * ∑ j, q j / (|s - r j| * ‖v‖)^3 * (s - r j) := by
+        rw [Finset.mul_sum]
+        apply Finset.sum_congr rfl
+        intro j _
+        rw [mul_pow]
+        field_simp
+      rw [this, h1, mul_zero]
+  have hinj : Set.InjOn g (equilibria q a) := by
+    intro x hx y hy hxy
+    rw [hline x hx, hline y hy]
+    simp only [g] at hxy
+    rw [hxy]
+  calc (equilibria q a).encard
+      ≤ {s : ℝ | (∀ j, s ≠ r j) ∧ ∑ j, q j / |s - r j|^3 * (s - r j) = 0}.encard :=
+        Set.encard_le_encard_of_injOn hmaps hinj
+    _ ≤ 4 := oneD_count r q hq hq'
+
+/-- **Lemma P**: for affinely independent charge positions every equilibrium lies in the plane of
+the charges. -/
+lemma equilibria_subset_affineSpan (q : Fin 3 → ℝ) (a : Fin 3 → E) (hq : ∀ j, q j ≠ 0)
+    (hind : AffineIndependent ℝ a) :
+    equilibria q a ⊆ (affineSpan ℝ (Set.range a) : Set E) := by
+  intro x hx
+  have hx' := (mem_equilibria_iff q a x).mp hx
+  have hxa (j : Fin 3) : x - a j ≠ 0 := sub_ne_zero.mpr (fun h => hx'.1 ⟨j, h.symm⟩)
+  set c : Fin 3 → ℝ := fun j => q j / ‖x - a j‖^3
+  have hc (j : Fin 3) : c j ≠ 0 :=
+    div_ne_zero (hq j) (pow_ne_zero 3 (norm_ne_zero_iff.mpr (hxa j)))
+  have hF : (∑ j, c j) • x = ∑ j, c j • a j := by
+    have := hx'.2
+    unfold field at this
+    rw [Finset.sum_smul, ← sub_eq_zero, ← Finset.sum_sub_distrib, ← this]
+    apply Finset.sum_congr rfl
+    intro j _
+    simp only [c, smul_sub]
+  by_cases hS : ∑ j, c j = 0
+  · exfalso
+    have h0 : (Finset.univ : Finset (Fin 3)).weightedVSub a c = (0 : E) := by
+      rw [Finset.weightedVSub_eq_linear_combination _ hS, ← hF, hS, zero_smul]
+    exact hc 0 (hind Finset.univ c hS h0 0 (Finset.mem_univ _))
+  · have hw : ∑ j, c j / ∑ i, c i = 1 := by
+      rw [← Finset.sum_div, div_self hS]
+    have hmem := affineCombination_mem_affineSpan (k := ℝ) hw a
+    rw [Finset.affineCombination_eq_linear_combination _ _ _ hw] at hmem
+    convert hmem using 1
+    have e : ∑ j, (c j / ∑ i, c i) • a j = (∑ i, c i)⁻¹ • ∑ j, c j • a j := by
+      rw [Finset.smul_sum]
+      apply Finset.sum_congr rfl
+      intro j _
+      rw [div_eq_inv_mul, mul_smul]
+    rw [e, ← hF, smul_smul, inv_mul_cancel₀ hS, one_smul]
+    rfl
+
+/-- The single remaining hypothesis: the planar (non-collinear) case of Tsai's theorem. -/
+def PlanarTsai : Prop :=
+  ∀ (q : Fin 3 → ℝ) (a : Fin 3 → E), AffineIndependent ℝ a → (∀ j, q j ≠ 0) →
+    (∀ i j, |q i| = |q j|) →
+    (∀ x ∈ equilibria q a, HasNondegenerateHessianAt (potential q a) x) →
+    {x ∈ equilibria q a | x ∈ affineSpan ℝ (Set.range a)}.encard ≤ 4
+
+theorem three_equal_magnitudes_of_planar (H : PlanarTsai) (q : Fin 3 → ℝ)
+    (a : Fin 3 → E) (ha : Function.Injective a) (hq : ∀ j, q j ≠ 0)
+    (hq' : ∀ i j, |q i| = |q j|)
+    (hnd : ∀ x ∈ equilibria q a, HasNondegenerateHessianAt (potential q a) x) :
+    (equilibria q a).encard ≤ 4 := by
+  by_cases hind : AffineIndependent ℝ a
+  · have h := H q a hind hq hq' hnd
+    have : {x ∈ equilibria q a | x ∈ affineSpan ℝ (Set.range a)} = equilibria q a :=
+      Set.sep_eq_self_iff_mem_true.mpr (fun x hx => equilibria_subset_affineSpan q a hq hind hx)
+    rwa [this] at h
+  · exact collinear_case q a ha hq hq' hnd (collinear_iff_not_affineIndependent.mpr hind)
+
+end OMA.Maxwell3

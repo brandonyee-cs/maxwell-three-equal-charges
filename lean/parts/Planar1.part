@@ -1,0 +1,59 @@
+
+namespace OMA.Maxwell3
+open Arxiv.«2607.27197»
+
+lemma coeff_hasFDerivAt' (q : ℝ) (a x : E) (hxa : x ≠ a) :
+    HasFDerivAt (fun y : E => q / ‖y-a‖^3)
+      ((-(3*q) / ‖x-a‖^5) • innerSL ℝ (x-a)) x := by
+  have hn : ‖x-a‖ ≠ 0 := norm_ne_zero_iff.mpr (sub_ne_zero.mpr hxa)
+  have h := (((hasDerivAt_pow 3 ‖x-a‖).inv (pow_ne_zero 3 hn)).const_mul q).comp_hasFDerivAt x
+    (norm_sub_hasFDerivAt a x hxa)
+  have hfun : (fun y : E => q / ‖y-a‖^3) = (fun r : ℝ => q * (r^3)⁻¹) ∘ (fun y : E => ‖y-a‖) := by
+    funext y; simp [div_eq_mul_inv]
+  rw [hfun]
+  refine h.congr_fderiv ?_
+  ext v
+  simp only [ContinuousLinearMap.smul_apply, innerSL_apply_apply, smul_eq_mul]
+  field_simp
+  ring
+
+lemma field_hasFDerivAt' (q : Fin 3 → ℝ) (a : Fin 3 → E) (x : E) (hx : x ∉ Set.range a) :
+    ∃ D : E →L[ℝ] E, HasFDerivAt (field q a) D x ∧
+      ∀ u : E, D u = ∑ j, ((q j / ‖x - a j‖^3) • u +
+        ((-(3 * q j) / ‖x - a j‖^5) * ⟪x - a j, u⟫) • (x - a j)) := by
+  have hn (j : Fin 3) : x ≠ a j := fun h => hx ⟨j, h.symm⟩
+  have hj (j : Fin 3) : HasFDerivAt (fun y : E => (q j / ‖y - a j‖^3) • (y - a j))
+      ((q j / ‖x - a j‖^3) • ContinuousLinearMap.id ℝ E +
+        ((-(3*q j) / ‖x - a j‖^5) • innerSL ℝ (x - a j)).smulRight (x - a j)) x :=
+    (coeff_hasFDerivAt' (q j) (a j) x (hn j)).fun_smul ((hasFDerivAt_id x).sub_const (a j))
+  refine ⟨∑ j, ((q j / ‖x - a j‖^3) • ContinuousLinearMap.id ℝ E +
+        ((-(3*q j) / ‖x - a j‖^5) • innerSL ℝ (x - a j)).smulRight (x - a j)), ?_, ?_⟩
+  · exact HasFDerivAt.fun_sum (u := Finset.univ) (fun j _ => hj j)
+  · intro u
+    simp only [ContinuousLinearMap.coe_sum', Finset.sum_apply, ContinuousLinearMap.add_apply,
+      ContinuousLinearMap.coe_smul', Pi.smul_apply, ContinuousLinearMap.coe_id', id_eq,
+      ContinuousLinearMap.smulRight_apply, innerSL_apply_apply, smul_eq_mul]
+
+/-- A nonzero kernel vector of the Hessian makes the equilibrium degenerate. -/
+lemma not_nondegenerate' (q : Fin 3 → ℝ) (a : Fin 3 → E) (x : E) (hx : x ∉ Set.range a)
+    (u : E) (hu : u ≠ 0)
+    (hker : ∑ j, ((q j / ‖x - a j‖^3) • u +
+        ((-(3 * q j) / ‖x - a j‖^5) * ⟪x - a j, u⟫) • (x - a j)) = 0) :
+    ¬ HasNondegenerateHessianAt (potential q a) x := by
+  intro hnd
+  obtain ⟨D, hD, hDu⟩ := field_hasFDerivAt' q a x hx
+  have hopen : IsOpen (Set.range a)ᶜ := (Set.finite_range a).isClosed.isOpen_compl
+  have hev : fderiv ℝ (potential q a) =ᶠ[nhds x]
+      fun y => -(innerSL ℝ (field q a y)) := by
+    filter_upwards [hopen.mem_nhds hx] with y hy
+    rw [(potential_hasGradient q a y hy).hasFDerivAt.fderiv]
+    ext w
+    simp [toDual_apply_apply, innerSL_apply_apply, inner_neg_left]
+  have hF : HasFDerivAt (fun y => -(innerSL ℝ (field q a y))) (-((innerSL ℝ).comp D)) x :=
+    (((innerSL ℝ : E →L[ℝ] E →L[ℝ] ℝ).hasFDerivAt).comp x hD).neg
+  obtain ⟨w, hw⟩ := hnd u hu
+  apply hw
+  rw [iteratedFDeriv_two_apply, hev.fderiv_eq, hF.fderiv]
+  simp [hDu u, hker]
+
+end OMA.Maxwell3

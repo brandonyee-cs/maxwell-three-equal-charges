@@ -1,0 +1,155 @@
+info: MaxwellThreeEqual: no previous manifest, creating one from scratch
+info: toolchain not updated; already up-to-date
+info: mathlib: running post-update hooks
+Current branch: HEAD
+Using cache from origin: (some leanprover-community/mathlib4)
+No files to download
+Already decompressed 8690 file(s)
+⚠ [8989/8992] Built MaxwellThreeEqual.ThreeEqual (73s)
+warning: MaxwellThreeEqual/ThreeEqual.lean:3:0: This file has no module docstring (`/-! ... -/`). Add one after the imports to document the file.
+
+Note: This linter can be disabled with `set_option linter.style.moduleDocstring false`
+warning: MaxwellThreeEqual/ThreeEqual.lean:24:10: This simp argument is unused:
+  dist_eq_norm
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [div_eq_mul_inv, toDual_apply_apply, inner_smul_left, smul_smul]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: MaxwellThreeEqual/ThreeEqual.lean:24:60: This simp argument is unused:
+  inner_smul_left
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [dist_eq_norm, div_eq_mul_inv, toDual_apply_apply, smul_smul]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: MaxwellThreeEqual/ThreeEqual.lean:27:6: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+warning: MaxwellThreeEqual/ThreeEqual.lean:20:6: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: MaxwellThreeEqual/ThreeEqual.lean:23:22: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: MaxwellThreeEqual/ThreeEqual.lean:23:32: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: MaxwellThreeEqual/ThreeEqual.lean:25:2: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: MaxwellThreeEqual/ThreeEqual.lean:26:2: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: MaxwellThreeEqual/ThreeEqual.lean:27:6: Unused tactic linter: `ring` does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+warning: MaxwellThreeEqual/ThreeEqual.lean:85:8: `ContinuousLinearMap.smul_apply` has been deprecated: Use `smul_apply` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.smul_apply` to `smul_apply x`).
+warning: MaxwellThreeEqual/ThreeEqual.lean:85:40: `ContinuousLinearMap.smul_apply` has been deprecated: Use `smul_apply` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.smul_apply` to `smul_apply x`).
+warning: MaxwellThreeEqual/ThreeEqual.lean:101:15: `ContinuousLinearMap.coe_sum'` has been deprecated: Use `FunLike.coe_sum` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.coe_sum'` to `FunLike.coe_sum x`).
+warning: MaxwellThreeEqual/ThreeEqual.lean:101:63: `ContinuousLinearMap.add_apply` has been deprecated: Use `add_apply` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.add_apply` to `add_apply x`).
+warning: MaxwellThreeEqual/ThreeEqual.lean:102:6: `ContinuousLinearMap.coe_smul'` has been deprecated: Use `FunLike.coe_smul` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.coe_smul'` to `FunLike.coe_smul x`).
+warning: MaxwellThreeEqual/ThreeEqual.lean:119:51: This simp argument is unused:
+  inner_neg_left
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [toDual_apply_apply, innerSL_apply_apply]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [8990/8992] Built MaxwellThreeEqual.Reduction (81s)
+warning: MaxwellThreeEqual/Reduction.lean:67:10: This simp argument is unused:
+  dist_eq_norm
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [div_eq_mul_inv, toDual_apply_apply, inner_smul_left, smul_smul]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: MaxwellThreeEqual/Reduction.lean:67:60: This simp argument is unused:
+  inner_smul_left
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [dist_eq_norm, div_eq_mul_inv, toDual_apply_apply, smul_smul]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: MaxwellThreeEqual/Reduction.lean:70:6: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+warning: MaxwellThreeEqual/Reduction.lean:63:6: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: MaxwellThreeEqual/Reduction.lean:66:22: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: MaxwellThreeEqual/Reduction.lean:66:32: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: MaxwellThreeEqual/Reduction.lean:68:2: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: MaxwellThreeEqual/Reduction.lean:69:2: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: MaxwellThreeEqual/Reduction.lean:70:6: Unused tactic linter: `ring` does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+warning: MaxwellThreeEqual/Reduction.lean:123:8: `ContinuousLinearMap.smul_apply` has been deprecated: Use `smul_apply` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.smul_apply` to `smul_apply x`).
+warning: MaxwellThreeEqual/Reduction.lean:123:40: `ContinuousLinearMap.smul_apply` has been deprecated: Use `smul_apply` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.smul_apply` to `smul_apply x`).
+warning: MaxwellThreeEqual/Reduction.lean:139:15: `ContinuousLinearMap.coe_sum'` has been deprecated: Use `FunLike.coe_sum` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.coe_sum'` to `FunLike.coe_sum x`).
+warning: MaxwellThreeEqual/Reduction.lean:139:63: `ContinuousLinearMap.add_apply` has been deprecated: Use `add_apply` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.add_apply` to `add_apply x`).
+warning: MaxwellThreeEqual/Reduction.lean:140:6: `ContinuousLinearMap.coe_smul'` has been deprecated: Use `FunLike.coe_smul` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.coe_smul'` to `FunLike.coe_smul x`).
+warning: MaxwellThreeEqual/Reduction.lean:157:51: This simp argument is unused:
+  inner_neg_left
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [toDual_apply_apply, innerSL_apply_apply]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: MaxwellThreeEqual/Reduction.lean:500:13: `ContinuousLinearMap.smul_apply` has been deprecated: Use `smul_apply` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.smul_apply` to `smul_apply x`).
+warning: MaxwellThreeEqual/Reduction.lean:517:15: `ContinuousLinearMap.coe_sum'` has been deprecated: Use `FunLike.coe_sum` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.coe_sum'` to `FunLike.coe_sum x`).
+warning: MaxwellThreeEqual/Reduction.lean:517:63: `ContinuousLinearMap.add_apply` has been deprecated: Use `add_apply` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.add_apply` to `add_apply x`).
+warning: MaxwellThreeEqual/Reduction.lean:518:6: `ContinuousLinearMap.coe_smul'` has been deprecated: Use `FunLike.coe_smul` instead
+
+Note: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.coe_smul'` to `FunLike.coe_smul x`).
+warning: MaxwellThreeEqual/Reduction.lean:535:51: This simp argument is unused:
+  inner_neg_left
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [toDual_apply_apply, innerSL_apply_apply]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: MaxwellThreeEqual/Reduction.lean:796:6: `push_neg` has been deprecated. Prefer using `push Not` instead.
+If you'd rather continue using `push_neg` in your project, you can implement it as follows:
+```
+open Lean.Parser.Tactic in
+macro "push_neg" cfg:optConfig loc:(location)? : tactic =>
+  `(tactic| push $cfg:optConfig Not $[$loc]?)
+```
+✔ [8991/8992] Built MaxwellThreeEqual (6.9s)
+Build completed successfully (8992 jobs).
+lake build  200.96s user 28.38s system 186% cpu 2:03.26 total

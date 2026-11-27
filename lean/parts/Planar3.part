@@ -1,0 +1,115 @@
+
+namespace OMA.Maxwell3
+open Arxiv.«2607.27197»
+
+lemma kernel2 (A B C : ℝ) (h : A * C - B^2 = 0) :
+    ∃ v1 v2 : ℝ, ¬(v1 = 0 ∧ v2 = 0) ∧ A * v1 + B * v2 = 0 ∧ B * v1 + C * v2 = 0 := by
+  by_cases hab : A = 0 ∧ B = 0
+  · refine ⟨1, 0, by simp, ?_, ?_⟩ <;> simp [hab.1, hab.2]
+  · refine ⟨B, -A, ?_, by ring, by linear_combination -h⟩
+    intro h'; apply hab; exact ⟨by linarith [h'.2], h'.1⟩
+
+lemma eq_coords (q : Fin 3 → ℝ) (a : Fin 3 → E) (hq : ∀ j, q j ≠ 0)
+    (hind : AffineIndependent ℝ a) (a0 f1 f2 : E) (X Y : Fin 3 → ℝ)
+    (ha : ∀ j, a j = a0 + X j • f1 + Y j • f2) (x : E) (hx : x ∈ equilibria q a) :
+    ∃ s t : ℝ, x = a0 + s • f1 + t • f2 := by
+  have hx' := (mem_equilibria_iff q a x).mp hx
+  have hxa (j : Fin 3) : x - a j ≠ 0 := sub_ne_zero.mpr (fun h => hx'.1 ⟨j, h.symm⟩)
+  set c : Fin 3 → ℝ := fun j => q j / ‖x - a j‖^3
+  have hc (j : Fin 3) : c j ≠ 0 :=
+    div_ne_zero (hq j) (pow_ne_zero 3 (norm_ne_zero_iff.mpr (hxa j)))
+  have hF : (∑ j, c j) • x = ∑ j, c j • a j := by
+    have := hx'.2
+    unfold field at this
+    rw [Finset.sum_smul, ← sub_eq_zero, ← Finset.sum_sub_distrib, ← this]
+    apply Finset.sum_congr rfl
+    intro j _
+    simp only [c, smul_sub]
+  have hS : ∑ j, c j ≠ 0 := by
+    intro hS
+    have h0 : (Finset.univ : Finset (Fin 3)).weightedVSub a c = (0 : E) := by
+      rw [Finset.weightedVSub_eq_linear_combination _ hS, ← hF, hS, zero_smul]
+    exact hc 0 (hind Finset.univ c hS h0 0 (Finset.mem_univ _))
+  have hF2 : (∑ j, c j) • x = (∑ j, c j) • a0 + (∑ j, c j * X j) • f1 + (∑ j, c j * Y j) • f2 := by
+    rw [hF]
+    simp only [ha, Fin.sum_univ_three]
+    module
+  refine ⟨(∑ j, c j)⁻¹ * (∑ j, c j * X j), (∑ j, c j)⁻¹ * (∑ j, c j * Y j), ?_⟩
+  have := congrArg (fun z : E => (∑ j, c j)⁻¹ • z) hF2
+  simp only [smul_add, smul_smul, inv_mul_cancel₀ hS, one_smul] at this
+  exact this
+
+/-- **Planar transfer**: a non-collinear configuration is carried by an orthogonal frame to the
+normalised plane configuration `(0,0), (1,0), (u,w)`; its equilibria map onto the 2-D equilibria and
+3-D non-degeneracy gives non-vanishing of the 2-D Hessian determinant. -/
+lemma planar_transfer (q : Fin 3 → ℝ) (a : Fin 3 → E) (hq : ∀ j, q j ≠ 0)
+    (hind : AffineIndependent ℝ a)
+    (hnd : ∀ x ∈ equilibria q a, HasNondegenerateHessianAt (potential q a) x) :
+    ∃ u w : ℝ, w ≠ 0 ∧ (∀ p : ℝ × ℝ, (∀ j, (p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2 ≠ 0) →
+      ∑ j, q j * (p.1 - ![0, 1, u] j) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^3 = 0 →
+      ∑ j, q j * (p.2 - ![0, 0, w] j) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^3 = 0 →
+      (∑ j, q j * (2 * (p.1 - ![0, 1, u] j)^2 - (p.2 - ![0, 0, w] j)^2) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^5) *
+        (∑ j, q j * (2 * (p.2 - ![0, 0, w] j)^2 - (p.1 - ![0, 1, u] j)^2) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^5) -
+        (∑ j, q j * (3 * (p.1 - ![0, 1, u] j) * (p.2 - ![0, 0, w] j)) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^5)^2 ≠ 0) ∧
+      (equilibria q a).encard ≤ {p : ℝ × ℝ | (∀ j, (p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2 ≠ 0) ∧
+      ∑ j, q j * (p.1 - ![0, 1, u] j) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^3 = 0 ∧
+      ∑ j, q j * (p.2 - ![0, 0, w] j) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^3 = 0}.encard := by
+  obtain ⟨f1, f2, u, w, h1, hf, hn, hw, ha1, ha2⟩ := exists_frame a hind
+  have ha : ∀ j, a j = a 0 + (![0, 1, u] j) • f1 + (![0, 0, w] j) • f2 := by
+    intro j; fin_cases j
+    · simp
+    · simp [ha1]
+    · simp [ha2]
+  have hL : ‖f1‖ ≠ 0 := norm_ne_zero_iff.mpr h1
+  -- the embedding of the plane
+  let ψ : ℝ × ℝ → E := fun p => a 0 + p.1 • f1 + p.2 • f2
+  have hnorm : ∀ (p : ℝ × ℝ) j, ‖ψ p - a j‖ = ‖f1‖ * Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2) := by
+    intro p j
+    simp only [ψ]
+    rw [coords_sub a (a 0) f1 f2 _ _ ha, frame_norm f1 f2 hf hn]
+  have hnotin : ∀ p : ℝ × ℝ, (∀ j, (p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2 ≠ 0) → ψ p ∉ Set.range a := by
+    rintro p hp ⟨j, hj⟩
+    have h0 := hnorm p j
+    rw [hj, sub_self, norm_zero] at h0
+    have hpos : 0 < Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2) := Real.sqrt_pos.mpr (lt_of_le_of_ne (by positivity) (Ne.symm (hp j)))
+    have := mul_pos (norm_pos_iff.mpr h1) hpos
+    linarith
+  have hfield : ∀ p : ℝ × ℝ, field q a (ψ p) = (‖f1‖^3)⁻¹ •
+      ((∑ j, q j * (p.1 - ![0, 1, u] j) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^3) • f1 + (∑ j, q j * (p.2 - ![0, 0, w] j) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^3) • f2) := by
+    intro p
+    exact coords_field q a (a 0) f1 f2 _ _ hf hn ha p.1 p.2
+  have hmem : ∀ p ∈ {p : ℝ × ℝ | (∀ j, (p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2 ≠ 0) ∧
+      ∑ j, q j * (p.1 - ![0, 1, u] j) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^3 = 0 ∧
+      ∑ j, q j * (p.2 - ![0, 0, w] j) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^3 = 0}, ψ p ∈ equilibria q a := by
+    rintro p ⟨hp, he1, he2⟩
+    rw [mem_equilibria_iff]
+    refine ⟨hnotin p hp, ?_⟩
+    rw [hfield p, he1, he2, zero_smul, zero_smul, add_zero, smul_zero]
+  refine ⟨u, w, hw, ?_, ?_⟩
+  · intro p hp he1 he2 hdet
+    obtain ⟨v1, v2, hv0, hk1, hk2⟩ := kernel2 _ _ _ hdet
+    have hv : v1 • f1 + v2 • f2 ≠ 0 := fun h0 => hv0 (frame_eq_zero f1 f2 hf hn h1 v1 v2 h0)
+    apply not_nondegenerate' q a (ψ p) (hnotin p hp) _ hv _ (hnd _ (hmem p ⟨hp, he1, he2⟩))
+    have := coords_kernel q a (a 0) f1 f2 _ _ hf hn h1 ha p.1 p.2 hp v1 v2
+    simp only [ψ]
+    rw [this, hk1, hk2, neg_zero, zero_smul, zero_smul, add_zero, smul_zero]
+  · have hsub : equilibria q a ⊆ ψ '' {p : ℝ × ℝ | (∀ j, (p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2 ≠ 0) ∧
+      ∑ j, q j * (p.1 - ![0, 1, u] j) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^3 = 0 ∧
+      ∑ j, q j * (p.2 - ![0, 0, w] j) / Real.sqrt ((p.1 - ![0, 1, u] j)^2 + (p.2 - ![0, 0, w] j)^2)^3 = 0} := by
+      intro x hx
+      obtain ⟨s, t, rfl⟩ := eq_coords q a hq hind (a 0) f1 f2 _ _ ha x hx
+      have hx' := (mem_equilibria_iff q a _).mp hx
+      have hp : ∀ j, (s - ![0, 1, u] j)^2 + (t - ![0, 0, w] j)^2 ≠ 0 := by
+        intro j h0
+        have h := hnorm (s, t) j
+        simp only at h
+        rw [h0, Real.sqrt_zero, mul_zero, norm_eq_zero, sub_eq_zero] at h
+        exact hx'.1 ⟨j, h.symm⟩
+      have hz := hx'.2
+      rw [show a 0 + s • f1 + t • f2 = ψ (s, t) from rfl, hfield (s, t)] at hz
+      have hz' := (smul_eq_zero.mp hz).resolve_left (inv_ne_zero (pow_ne_zero 3 hL))
+      obtain ⟨e1, e2⟩ := frame_eq_zero f1 f2 hf hn h1 _ _ hz'
+      exact ⟨(s, t), ⟨hp, e1, e2⟩, rfl⟩
+    exact (Set.encard_le_encard hsub).trans (Set.encard_image_le _ _)
+
+end OMA.Maxwell3
